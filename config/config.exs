@@ -19,6 +19,14 @@ config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id]
 
+# Configures Neo4j endpoint
+config :neo4j_sips, Neo4j,
+  url: "http://localhost:7474",
+  pool_size: 5,
+  max_overflow: 2,
+  timeout: 30,
+  basic_auth: [username: "neo4j", password: "elbuencoffi"]
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"
