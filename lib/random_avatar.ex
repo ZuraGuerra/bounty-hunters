@@ -12,9 +12,9 @@ defmodule Elbuencoffi.RandomAvatar do
       	"#{Enum.at(avatar, 2)}",
       	"#{Enum.at(avatar, 3)}",
       	"#{Enum.at(avatar, 4)}",
-      	"-flatten", "web/static/assets/avatars/#{nickname}.png"
+      	"-flatten", "priv/static/avatars/#{nickname}.png"
       ])
-      avatar_url = "web/static/assets/avatars/#{nickname}.png"
+      avatar_url = "/assets/avatars/#{nickname}.png"
 	end
 
 	defp golemize(avatar_code) do
