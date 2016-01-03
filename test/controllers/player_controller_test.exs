@@ -23,16 +23,6 @@ defmodule Elbuencoffi.PlayerControllerTest do
   	:ok
   end
 
-  defp clear_neo4j_db do
-  	cypher = "MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r"
-  	Neo4j.query!(Neo4j.conn, cypher)
-  end
-
-  defp neo4j!(cypher) do
-    [%{"ok" => result}] = Neo4j.query!(Neo4j.conn, cypher)
-    result
-  end
-
   test "POST /api/players" do
     conn = post conn(), "/api/players", @create_player_params
     assert json = json_response(conn, 200)
@@ -57,37 +47,66 @@ defmodule Elbuencoffi.PlayerControllerTest do
     assert M2x.client |> Device.fetch(id)
   end
 
-  test "POST /api/players/:phone" do
+  test "POST /api/players/:id" do
   	player = create_player
   	conn = post conn(), "/api/players/#{player["id"]}", @update_location_params
     assert json_response(conn, 200)  	
   end
 
 
-  defp create_player(phone \\ "12345", nickname \\ "zura") do
-    id = M2x.create_player_device(phone, nickname)
-  	neo4j! """
-  	CREATE (p:Player {
-      id: "#{id}",
-  		nickname: "#{nickname}",
-  		avatar_url: "fb.com/myid/mypic.png",
-  		money: 100,
-      phone: "#{phone}"
-		})
-  	RETURN p as ok
-  	"""
-  end
-
   test "GET /api/players/:id" do
   	player = create_player
   	conn = get conn(), "/api/players/#{player["id"]}"
   	json = json_response(conn, 200)
-  	assert json = %{
-  		nickname: player["nickname"],
-  		avatar_url: player["avatar_url"],
-  		money: player["money"],
-  		pending_matches: []
-  	}
+    assert json["id"]
+    assert json["avatar_url"]
+    assert json["money"]
+    assert json["nickname"]
+    assert json["phone"]
+    assert json["pending_matches"]
+  end
+
+  test "POST /api/players/:id when a place is found, it adds money to player" do
+    player = create_player
+    place = create_place
+    conn = post conn(), "/api/players/#{player["id"]}", @update_location_params
+
+  end 
+
+  defp clear_neo4j_db do
+    cypher = "MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r"
+    Neo4j.query!(Neo4j.conn, cypher)
+  end
+
+  defp neo4j!(cypher) do
+    [%{"ok" => result}] = Neo4j.query!(Neo4j.conn, cypher)
+    result
+  end
+
+  defp create_player(phone \\ "12345", nickname \\ "zura") do
+    id = M2x.create_player_device(phone, nickname)
+    neo4j! """
+    CREATE (p:Player {
+      id: "#{id}",
+      nickname: "#{nickname}",
+      avatar_url: "fb.com/myid/mypic.png",
+      money: 100,
+      phone: "#{phone}"
+    })
+    RETURN p as ok
+    """
+  end
+
+  defp create_place(name \\ "palacio", location \\ @update_location_params) do
+    place = neo4j! """
+    CREATE (p:Place {
+      name: "#{name}",
+      avatar_url: "some/place.png",
+      bounty: 250,
+      latitude: #{location[:latitude]},
+      longitude: #{location[:longitude]}
+    })
+    """
   end
 
 

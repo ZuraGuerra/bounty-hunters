@@ -28,4 +28,11 @@ defmodule Elbuencoffi.M2x do
     id
   end
 
+  def update_location(device_id, latitude, longitude) do
+    response = client |> Client.put("/devices/#{device_id}/location", %{
+      "latitude" => latitude,
+      "longitude" => longitude
+    })
+  end
+
 end

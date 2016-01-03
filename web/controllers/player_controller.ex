@@ -23,12 +23,13 @@ defmodule Elbuencoffi.PlayerController do
   end
 
   def update_location(conn, %{"id" => id, "latitude" => latitude, "longitude" => longitude}) do
+    M2x.update_location(id, latitude, longitude)
   	player = neo4j! """
   	MATCH (p:Player {id: "#{id}"})
   	SET p.latitude = #{latitude}, p.longitude = #{longitude}
   	RETURN p as ok
   	"""
-  	json(conn, player)
+    show(conn, %{"id" => id})
   end
 
   def show(conn, %{"id" => id}) do
@@ -36,6 +37,13 @@ defmodule Elbuencoffi.PlayerController do
   	MATCH (p:Player {id: "#{id}"})
   	RETURN p as ok
   	"""
+    player = Map.put(player, "pending_matches", pending_matches(id))
   	json(conn, player)
   end
+
+
+  defp pending_matches(player_id) do
+    []
+  end
+
 end
