@@ -1,6 +1,10 @@
 defmodule Elbuencoffi.PlayerControllerTest do
   use Elbuencoffi.ConnCase
+
   alias Neo4j.Sips, as: Neo4j
+  alias Elbuencoffi.M2x
+  alias M2X.Client
+  alias M2X.Device
 
   @create_player_params %{
   	phone: "5515787289",
@@ -14,6 +18,7 @@ defmodule Elbuencoffi.PlayerControllerTest do
 
 
   setup do
+    M2x.delete_all_devices!
   	clear_neo4j_db
   	:ok
   end
@@ -35,38 +40,48 @@ defmodule Elbuencoffi.PlayerControllerTest do
 
   test "POST /api/players returns created user id" do
     conn = post conn(), "/api/players", @create_player_params
-    assert json_response(conn, 200)["phone"]
+    assert json_response(conn, 200)["id"]
   end
 
   test "POST /api/players persists player in Neo4j" do
     conn = post conn(), "/api/players", @create_player_params
-    phone = json_response(conn, 200)["phone"]
+    id = json_response(conn, 200)["id"]
     assert neo4j! """
-    MATCH (p:Player {phone: "#{phone}"}) RETURN p as ok
+    MATCH (p:Player {id: "#{id}"}) RETURN p as ok
     """
+  end
+
+  test "POST /api/players persists device in M2X" do
+    conn = post conn(), "/api/players", @create_player_params
+    id = json_response(conn, 200)["id"]
+    response = Client.get M2x.client, "/devices/#{id}"
+    assert %{json: %{"id" => id}} = response
   end
 
   test "POST /api/players/:phone" do
   	player = create_player
-  	conn = post conn(), "/api/players/#{player["phone"]}", @update_location_params
+  	conn = post conn(), "/api/players/#{player["id"]}", @update_location_params
     assert json_response(conn, 200)  	
   end
 
-  defp create_player(phone \\ "12345") do
+
+  defp create_player(phone \\ "12345", nickname \\ "zura") do
+    id = M2x.create_player_device(phone, nickname)
   	neo4j! """
   	CREATE (p:Player {
-  		nickname: "Zurafiki",
+      id: "#{id}",
+  		nickname: "#{nickname}",
   		avatar_url: "fb.com/myid/mypic.png",
   		money: 100,
       phone: "#{phone}"
-  		})
+		})
   	RETURN p as ok
   	"""
   end
 
-  test "GET /api/players/:phone" do
+  test "GET /api/players/:id" do
   	player = create_player
-  	conn = get conn(), "/api/players/#{player["phone"]}"
+  	conn = get conn(), "/api/players/#{player["id"]}"
   	json = json_response(conn, 200)
   	assert json = %{
   		nickname: player["nickname"],
