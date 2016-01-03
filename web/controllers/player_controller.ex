@@ -38,6 +38,7 @@ defmodule Elbuencoffi.PlayerController do
 
   def generate_avatar(conn, %{"nickname" => nickname}) do
     avatar_url = RandomAvatar.generate(nickname)
+    json(conn, %{avatar_url: avatar_url})
   end
 
   defp existing_player(nickname) do
