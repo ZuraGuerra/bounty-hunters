@@ -8,9 +8,9 @@ defmodule Elbuencoffi.MatchController do
   end
 
   defp leaderboard do
-    neo4j!("""
+    Neo4j.query!(Neo4j.conn, """
     MATCH (p:Player)
-    RETURN p as ok
+    RETURN p
     ORDER BY p.money
     LIMIT 10
     """)
