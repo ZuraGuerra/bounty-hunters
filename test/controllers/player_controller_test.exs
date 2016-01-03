@@ -54,8 +54,7 @@ defmodule Elbuencoffi.PlayerControllerTest do
   test "POST /api/players persists device in M2X" do
     conn = post conn(), "/api/players", @create_player_params
     id = json_response(conn, 200)["id"]
-    response = Client.get M2x.client, "/devices/#{id}"
-    assert %{json: %{"id" => id}} = response
+    assert M2x.client |> Device.fetch(id)
   end
 
   test "POST /api/players/:phone" do
