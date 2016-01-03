@@ -24,5 +24,9 @@ defmodule Elbuencoffi.Router do
     pipe_through :api
 
     post "/players", PlayerController, :create
+
+    post "/players/:id", PlayerController, :update_location
+    get "/players/:id", PlayerController, :show
+
   end
 end
