@@ -2,6 +2,7 @@ defmodule Elbuencoffi.PlayerController do
   use Elbuencoffi.Web, :controller
   alias Neo4j.Sips, as: Neo4j
   alias Elbuencoffi.M2x
+  alias Elbuencoffi.RandomAvatar
 
   defp neo4j!(cypher) do
     [%{"ok" => ok}] = Neo4j.query!(Neo4j.conn, cypher)
@@ -20,7 +21,7 @@ defmodule Elbuencoffi.PlayerController do
     player = existing_player(nickname)
     unless player do
       device_id = M2x.create_player_device(phone, nickname)
-      avatar_url = "foo.png"
+      avatar_url = RandomAvatar.generate
     	player = neo4j! """
     	CREATE (p:Player {
         id: "#{device_id}",
