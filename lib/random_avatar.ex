@@ -14,11 +14,14 @@ defmodule Elbuencoffi.RandomAvatar do
       	"#{Enum.at(avatar, 4)}",
       	"-flatten", "priv/static/images/#{nickname}.png"
       ])
+      System.cmd("convert", [
+            "priv/static/images/#{nickname}.png",
+            "-transparent", "white", "priv/static/images/#{nickname}.png"])
       avatar_url = "/images/#{nickname}.png"
 	end
 
 	defp golemize(avatar_code) do
-	  back = @avatar_base_url <> "Face#{Enum.at(avatar_code, 0)}/Back.png"
+	back = @avatar_base_url <> "Face#{Enum.at(avatar_code, 0)}/Back.png"
       body = @avatar_base_url <> "Face#{Enum.at(avatar_code, 1)}/Body.png"
       eyes = @avatar_base_url <> "Face#{Enum.at(avatar_code, 2)}/Eyes.png"
       mouth = @avatar_base_url <> "Face#{Enum.at(avatar_code, 3)}/Mouth.png"
