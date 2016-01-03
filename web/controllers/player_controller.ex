@@ -17,17 +17,27 @@ defmodule Elbuencoffi.PlayerController do
   end
 
   def create(conn, %{"phone" => phone, "nickname" => nickname}) do
-    device_id = M2x.create_player_device(phone, nickname)
-  	player = neo4j! """
-  	CREATE (p:Player {
-      id: "#{device_id}",
-  		phone: "#{phone}", 
-  		nickname: "#{nickname}", 
-  		money: 100
-    })
-    RETURN p as ok
-  	"""
+    player = existing_player(nickname)
+    unless player do
+      device_id = M2x.create_player_device(phone, nickname)
+    	player = neo4j! """
+    	CREATE (p:Player {
+        id: "#{device_id}",
+    		phone: "#{phone}", 
+    		nickname: "#{nickname}", 
+    		money: 100
+      })
+      RETURN p as ok
+    	"""
+    end
   	json(conn, player)
+  end
+
+  defp existing_player(nickname) do
+    neo4j_ok """
+    MATCH (p:Player {nickname: "#{nickname}"})
+    RETURN p as ok
+    """
   end
 
   def update_location(conn, %{"id" => id, "latitude" => latitude, "longitude" => longitude}) do
