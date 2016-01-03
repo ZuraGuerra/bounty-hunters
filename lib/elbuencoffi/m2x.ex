@@ -51,7 +51,7 @@ defmodule Elbuencoffi.M2x do
     response = Client.post(client, "/devices/search", %{
       location: %{
         within_circle: %{
-          center: %{ latitude: latitude, longitude: longitude },
+          center: %{ latitude: String.to_float("#{latitude}"), longitude: String.to_float("#{longitude}") },
           radius: Map.put(%{}, unit, distance)
         }
       }
