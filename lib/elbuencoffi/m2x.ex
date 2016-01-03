@@ -48,14 +48,14 @@ defmodule Elbuencoffi.M2x do
   end
 
   def device_near_location(tags, latitude, longitude, distance \\ 50, unit \\ "m") do
-    Device.search client, %{
+    Device.search(client, %{
       location: %{
         within_circle: %{
           center: %{ latitude: latitude, longitude: longitude },
           radius: Map.put(%{}, unit, distance)
         }
       }
-    }
+    }) || []
   end
 
 end
