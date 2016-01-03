@@ -3,6 +3,26 @@ defmodule Elbuencoffi.MatchController do
 
   alias Neo4j.Sips, as: Neo4j
 
+  def index(conn, _params) do
+    json conn, %{leaderboard: leaderboard}
+  end
+
+  defp leaderboard do
+    neo4j! """
+    MATCH (p:Player)
+    RETURN p
+    ORDER BY p.money
+    LIMIT 10
+    """
+    |> Enum.map(fn p ->
+      %{
+        nickname: p["nickname"],
+        avatar_url: p["avatar_url"],
+        money: p["money"]
+      }
+    end)
+  end
+
   def update(conn, %{"id" => match_id, "score" => score, "user_id" => user_id}) do
     neo4j! """
     MATCH (a:Player {id: "#{user_id}"})-[m:Match {id: "#{match_id}"}]->(b:Player)

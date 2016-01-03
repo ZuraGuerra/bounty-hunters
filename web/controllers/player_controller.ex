@@ -20,11 +20,13 @@ defmodule Elbuencoffi.PlayerController do
     player = existing_player(nickname)
     unless player do
       device_id = M2x.create_player_device(phone, nickname)
+      avatar_url = "foo.png"
     	player = neo4j! """
     	CREATE (p:Player {
         id: "#{device_id}",
     		phone: "#{phone}", 
     		nickname: "#{nickname}", 
+        avatar_url: "#{avatar_url}",
     		money: 100
       })
       RETURN p as ok

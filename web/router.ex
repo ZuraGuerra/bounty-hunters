@@ -30,5 +30,7 @@ defmodule Elbuencoffi.Router do
 
     post "/matches/:id", MatchController, :update
 
+    get "/leaderboard", MatchController, :index
+
   end
 end
