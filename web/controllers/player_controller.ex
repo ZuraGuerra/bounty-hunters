@@ -36,6 +36,10 @@ defmodule Elbuencoffi.PlayerController do
   	json(conn, player)
   end
 
+  def generate_avatar(conn, %{"nickname" => nickname}) do
+    avatar_url = RandomAvatar.generate(nickname)
+  end
+
   defp existing_player(nickname) do
     neo4j_ok """
     MATCH (p:Player {nickname: "#{nickname}"})

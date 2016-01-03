@@ -32,5 +32,7 @@ defmodule Elbuencoffi.Router do
 
     get "/leaderboard", MatchController, :index
 
+    post "/avatars", PlayerController, :generate_avatar
+
   end
 end
