@@ -36,6 +36,7 @@ defmodule Elbuencoffi.Mixfile do
      {:phoenix_html, "~> 2.1"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:cowboy, "~> 1.0"},
+     {:cors_plug, "~> 0.1.4"},
      {:mix_test_watch, "~> 0.2", only: :dev},
      {:m2x, github: "attm2x/m2x-elixir"},
      {:neo4j_sips, "~> 0.1"}]
