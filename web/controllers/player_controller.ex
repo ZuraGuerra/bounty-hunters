@@ -21,7 +21,7 @@ defmodule Elbuencoffi.PlayerController do
     player = existing_player(nickname)
     unless player do
       device_id = M2x.create_player_device(phone, nickname)
-      avatar_url = RandomAvatar.generate
+      avatar_url = RandomAvatar.generate(nickname)
     	player = neo4j! """
     	CREATE (p:Player {
         id: "#{device_id}",
