@@ -47,7 +47,7 @@ defmodule Elbuencoffi.M2x do
     })
   end
 
-  def device_near_location(tags, latitude, longitude, distance \\ 50, unit \\ "m") do
+  def device_near_location(tags, latitude, longitude, distance \\ 1, unit \\ "km") do
     Device.search(client, %{
       location: %{
         within_circle: %{

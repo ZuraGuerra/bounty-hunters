@@ -105,6 +105,7 @@ defmodule Elbuencoffi.PlayerControllerTest do
     conn = post conn(), "/api/players/#{a["id"]}", @update_location_params
 
     assert json = json_response(conn, 200)
+    IO.puts inspect(json)
     assert [match] = json["pending_matches"]
 
     conn = post conn(), "/api/matches/#{match["id"]}", %{user_id: a["id"], score: 0}
