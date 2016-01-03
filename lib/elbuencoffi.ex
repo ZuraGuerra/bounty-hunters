@@ -13,6 +13,11 @@ defmodule Elbuencoffi do
       worker(Elbuencoffi.Repo, []),
       # Here you could define other workers and supervisors as children
       # worker(Elbuencoffi.Worker, [arg1, arg2, arg3]),
+
+      # Imagemagick random avatars task
+      # worker(Elbuencoffi.RandomAvatar, [])
+      # supervisor(Task.Supervisor, [[name: :random_avatar]]),
+      # worker(Task, [Elbuencoffi.RandomAvatar, :generate, ["zurafiki"]]),
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
