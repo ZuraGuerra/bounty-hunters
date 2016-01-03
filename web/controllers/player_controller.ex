@@ -2,44 +2,37 @@ defmodule Elbuencoffi.PlayerController do
   use Elbuencoffi.Web, :controller
   alias Neo4j.Sips, as: Neo4j
 
-  def create(conn, params) do
-  	cypher = """
+  defp neo4j!(cypher) do
+    [%{"ok" => ok}] = Neo4j.query!(Neo4j.conn, cypher)
+    ok
+  end
+
+  def create(conn, %{"phone" => phone, "nickname" => nickname}) do
+  	player = neo4j! """
   	CREATE (p:Player {
-  		phone: "#{params[:phone]}", 
-  		nickname: "#{params[:nickname]}", 
+  		phone: "#{phone}", 
+  		nickname: "#{nickname}", 
   		money: 100
-  	    })
-    RETURN true
+    })
+    RETURN p as ok
   	"""
-  	[true] = Neo4j.query!(Neo4j.conn, cypher)
-  	json(conn, %{success: true})
+  	json(conn, player)
   end
 
-  def update_location(conn, params) do
-  	latitude = params["latitude"]
-  	longitude = params["longitude"]
-  	id = params["id"]
-  	cypher = """
-  	MATCH (p:Player) WHERE id(p) = #{id}
+  def update_location(conn, %{"phone" => phone, "latitude" => latitude, "longitude" => longitude}) do
+  	player = neo4j! """
+  	MATCH (p:Player {phone: "#{phone}"})
   	SET p.latitude = #{latitude}, p.longitude = #{longitude}
-  	RETURN p
+  	RETURN p as ok
   	"""
-  	[player] = Neo4j.query!(Neo4j.conn, cypher)
-  	json(conn, %{})
+  	json(conn, player)
   end
 
-  def show(conn, params) do
-  	id = params["id"]
-  	cypher = """
-  	MATCH (p:Player) WHERE id(p) = #{id}
-  	RETURN p
+  def show(conn, %{"phone" => phone}) do
+  	player = neo4j! """
+  	MATCH (p:Player {phone: "#{phone}"})
+  	RETURN p as ok
   	"""
-  	[player] = Neo4j.query!(Neo4j.conn, cypher)
-  	json(conn, %{
-  		nickname: player["nickname"],
-  		avatar_url: player["avatar_url"],
-  		money: player["money"],
-  		pending_matches: []
-  		})
+  	json(conn, player)
   end
 end

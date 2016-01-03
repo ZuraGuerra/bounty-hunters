@@ -23,6 +23,11 @@ defmodule Elbuencoffi.PlayerControllerTest do
   	Neo4j.query!(Neo4j.conn, cypher)
   end
 
+  defp neo4j!(cypher) do
+    [%{"ok" => result}] = Neo4j.query!(Neo4j.conn, cypher)
+    result
+  end
+
   test "POST /api/players" do
     conn = post conn(), "/api/players", @create_player_params
     assert json = json_response(conn, 200)
@@ -30,43 +35,38 @@ defmodule Elbuencoffi.PlayerControllerTest do
 
   test "POST /api/players returns created user id" do
     conn = post conn(), "/api/players", @create_player_params
-    json = json_response(conn, 200)
-    assert json["id"]
+    assert json_response(conn, 200)["phone"]
   end
 
   test "POST /api/players persists player in Neo4j" do
     conn = post conn(), "/api/players", @create_player_params
-    json = json_response(conn, 200)
-    id = json["id"]
-    cypher = "MATCH (p:Player) WHERE id(p) = #{id} RETURN p"
-    assert [player] = Neo4j.query!(Neo4j.conn, cypher)
+    phone = json_response(conn, 200)["phone"]
+    assert neo4j! """
+    MATCH (p:Player {phone: "#{phone}"}) RETURN p as ok
+    """
   end
 
-  test "POST /api/players/:id" do
+  test "POST /api/players/:phone" do
   	player = create_player
-  	conn = post conn(), "/api/players/#{player["id"]}", @update_location_params
+  	conn = post conn(), "/api/players/#{player["phone"]}", @update_location_params
     assert json_response(conn, 200)  	
   end
 
-  defp create_player do
-  	cypher = """
+  defp create_player(phone \\ "12345") do
+  	neo4j! """
   	CREATE (p:Player {
   		nickname: "Zurafiki",
   		avatar_url: "fb.com/myid/mypic.png",
-  		money: 100
+  		money: 100,
+      phone: "#{phone}"
   		})
-  	RETURN id(p) as id, 
-  	    p.nickname as nickname,
-  	    p.avatar_url as avatar_url,
-  	    p.money as money
+  	RETURN p as ok
   	"""
-	[player]  = Neo4j.query!(Neo4j.conn, cypher)
-	player
   end
 
-  test "GET /api/players/:id" do
+  test "GET /api/players/:phone" do
   	player = create_player
-  	conn = get conn(), "/api/players/#{player["id"]}"
+  	conn = get conn(), "/api/players/#{player["phone"]}"
   	json = json_response(conn, 200)
   	assert json = %{
   		nickname: player["nickname"],
@@ -76,18 +76,5 @@ defmodule Elbuencoffi.PlayerControllerTest do
   	}
   end
 
-  test "GET /api/players/:id returns a pending match" do
-  	player = create_player
-  	challenger = create_player
-    conn = get conn(), "/api/players/#{player["id"]}"
-    cypher = """
-    
-    MATCH (p:Player), (c:Player)
-    WHERE id(p) = "#{player["id"]}", id(c) = "#{challenger["id"]}"
-    
-    RETURN p, c
-    """
-    assert [player, match, challenger] = Neo4j.query!(Neo4j.conn, cypher)
-  end
 
 end

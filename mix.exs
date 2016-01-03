@@ -19,7 +19,7 @@ defmodule Elbuencoffi.Mixfile do
   def application do
     [mod: {Elbuencoffi, []},
      applications: [:phoenix, :phoenix_html, :cowboy, :logger,
-                    :neo4j_sips, :phoenix_ecto, :postgrex]]
+                    :neo4j_sips, :phoenix_ecto, :postgrex, :m2x]]
   end
 
   # Specifies which paths to compile per environment.
@@ -36,6 +36,8 @@ defmodule Elbuencoffi.Mixfile do
      {:phoenix_html, "~> 2.1"},
      {:phoenix_live_reload, "~> 1.0", only: :dev},
      {:cowboy, "~> 1.0"},
+     {:mix_test_watch, "~> 0.2", only: :dev},
+     {:m2x, github: "attm2x/m2x-elixir"},
      {:neo4j_sips, "~> 0.1"}]
   end
 
