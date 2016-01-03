@@ -57,6 +57,7 @@ defmodule Elbuencoffi.M2x do
       }
     })
     %{json: %{"devices" => devices}} = response
+    IO.puts "NEAR #{inspect(devices)}"
     devices
   end
 
