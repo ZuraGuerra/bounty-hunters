@@ -129,7 +129,7 @@ defmodule Elbuencoffi.PlayerController do
 
   defp pending_matches(player_id) do
     cypher = """
-    MATCH (a:Player {id: "#{player_id}"})-[m:Match]->(b:Player)
+    MATCH (a:Player {id: "#{player_id}"})-[m:Match]-(b:Player)
     RETURN m, b    
     """
     Neo4j.query!(Neo4j.conn, cypher)
