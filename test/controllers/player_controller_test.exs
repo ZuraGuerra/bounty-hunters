@@ -70,7 +70,10 @@ defmodule Elbuencoffi.PlayerControllerTest do
     player = create_player
     place = create_place
     conn = post conn(), "/api/players/#{player["id"]}", @update_location_params
-
+    assert 350 = neo4j! """
+    MATCH (a:Player {id: "#{player["id"]}"})-[:Looths]->(b:Place)
+    RETURN a.money as ok
+    """
   end 
 
   defp clear_neo4j_db do
@@ -98,14 +101,18 @@ defmodule Elbuencoffi.PlayerControllerTest do
   end
 
   defp create_place(name \\ "palacio", location \\ @update_location_params) do
+    %{latitude: latitude, longitude: longitude} = location
+    id = M2x.create_place_device(name, latitude, longitude)
     place = neo4j! """
     CREATE (p:Place {
+      id: "#{id}",
       name: "#{name}",
       avatar_url: "some/place.png",
       bounty: 250,
-      latitude: #{location[:latitude]},
-      longitude: #{location[:longitude]}
+      latitude: #{latitude},
+      longitude: #{longitude}
     })
+    RETURN p as ok
     """
   end
 
