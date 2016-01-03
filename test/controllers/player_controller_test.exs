@@ -130,6 +130,7 @@ defmodule Elbuencoffi.PlayerControllerTest do
     """
 
     assert winner["id"] == b["id"]
+    assert winner["money"] > b["money"]
   end
 
   defp clear_neo4j_db do

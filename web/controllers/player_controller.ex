@@ -47,6 +47,8 @@ defmodule Elbuencoffi.PlayerController do
   	RETURN p as ok
   	"""
     player = Map.put(player, "pending_matches", pending_matches(id))
+    player = Map.put(player, "won_matches", won_matches(id))
+    player = Map.put(player, "lost_matches", lost_matches(id))
   	json(conn, player)
   end
 
@@ -119,6 +121,36 @@ defmodule Elbuencoffi.PlayerController do
         nickname: other["nickname"],
         money: other["money"],
         avatar_url: other["avatar_url"]
+      }
+    end)
+  end
+
+  defp lost_matches(player_id) do
+    cypher = """
+    MATCH (l:Player {id: "#{player_id}"})<-[m:Beats]-(w:Player)
+    RETURN m, w    
+    """
+    Neo4j.query!(Neo4j.conn, cypher)
+    |> Enum.map(fn %{"w" => other, "m" => beat} -> 
+      %{
+        nickname: other["nickname"],
+        avatar_url: other["avatar_url"],
+        bounty: beat["bounty"]
+      }
+    end)
+  end
+
+  defp won_matches(player_id) do
+    cypher = """
+    MATCH (w:Player {id: "#{player_id}"})-[m:Beats]->(l:Player)
+    RETURN m, l    
+    """
+    Neo4j.query!(Neo4j.conn, cypher)
+    |> Enum.map(fn %{"l" => other, "m" => beat} -> 
+      %{
+        nickname: other["nickname"],
+        avatar_url: other["avatar_url"],
+        bounty: beat["bounty"]
       }
     end)
   end

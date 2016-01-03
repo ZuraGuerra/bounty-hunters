@@ -19,14 +19,18 @@ defmodule Elbuencoffi.MatchController do
     winner = neo4j! """
     MATCH (a:Player)-[m:Match {id: "#{match_id}"}]->(b:Player)
     WHERE m.score_a >= m.score_b
-    CREATE UNIQUE (a)-[w:Beats]->(b)
+    CREATE UNIQUE (a)-[w:Beats {bounty: (b.money * 0.1)}]->(b)
+    SET b.money = b.money - w.bounty
+    SET a.money = a.money + w.bounty
     RETURN a.id as ok LIMIT 1
 
     UNION
 
     MATCH (a:Player)-[m:Match {id: "#{match_id}"}]->(b:Player)
     WHERE m.score_a < m.score_b
-    CREATE UNIQUE (a)<-[w:Beats]-(b)
+    CREATE UNIQUE (a)<-[w:Beats {bounty: (a.money * 0.1)}]-(b)
+    SET a.money = a.money - w.bounty
+    SET b.money = b.money + w.bounty    
     RETURN b.id as ok LIMIT 1
 
     UNION
