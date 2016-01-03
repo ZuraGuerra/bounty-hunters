@@ -76,6 +76,62 @@ defmodule Elbuencoffi.PlayerControllerTest do
     """
   end 
 
+  test "POST /api/players/:id when a player is found, it creates a match challenge" do
+    a = create_player
+    b = create_player
+    conn = post conn(), "/api/players/#{b["id"]}", @update_location_params
+    conn = post conn(), "/api/players/#{a["id"]}", @update_location_params
+    assert match = neo4j! """
+    MATCH (a:Player {id: "#{a["id"]}"})-[m:Match]->(b:Player {id: "#{b["id"]}"})
+    RETURN m as ok
+    """
+    assert match["id"]
+    assert match["latitude_a"]
+    assert match["latitude_b"]
+
+    assert json = json_response(conn, 200)
+    assert [match] = json["pending_matches"]
+    assert match["id"]
+    assert match["nickname"]
+    assert match["money"]
+    assert match["avatar_url"]
+  end
+
+
+  test "POST /api/matches/:id" do
+    a = create_player
+    b = create_player
+    conn = post conn(), "/api/players/#{b["id"]}", @update_location_params
+    conn = post conn(), "/api/players/#{a["id"]}", @update_location_params
+
+    assert json = json_response(conn, 200)
+    assert [match] = json["pending_matches"]
+
+    conn = post conn(), "/api/matches/#{match["id"]}", %{user_id: a["id"], score: 0}
+    assert json = json_response(conn, 200)
+    assert "pending" = json["result"]
+
+    assert m = neo4j! """
+    MATCH (a:Player)-[m:Match {id: "#{match["id"]}", score_a: 0}]->(b:Player)
+    RETURN m.id as ok
+    """
+
+    conn = post conn(), "/api/matches/#{match["id"]}", %{user_id: b["id"], score: 10}
+    assert json = json_response(conn, 200)
+    assert "wins" = json["result"]
+
+    assert neo4j! """
+    MATCH (a:Player)-[m:Match {id: "#{match["id"]}", score_a: 0, score_b: 10}]->(b:Player)
+    RETURN m.id as ok
+    """
+    assert winner = neo4j! """
+    MATCH (w:Player)-[m:Beats]->(l:Player)
+    RETURN w as ok
+    """
+
+    assert winner["id"] == b["id"]
+  end
+
   defp clear_neo4j_db do
     cypher = "MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r"
     Neo4j.query!(Neo4j.conn, cypher)

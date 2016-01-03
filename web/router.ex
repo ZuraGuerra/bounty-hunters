@@ -28,5 +28,7 @@ defmodule Elbuencoffi.Router do
     post "/players/:id", PlayerController, :update_location
     get "/players/:id", PlayerController, :show
 
+    post "/matches/:id", MatchController, :update
+
   end
 end

@@ -57,6 +57,10 @@ defmodule Elbuencoffi.PlayerController do
 
   defp perform_device_match(%{attributes: %{"id" => other_id, "tags" => ["player"]}}, player_id) do
     unless other_id == player_id do
+      player_already_challenged(player_id, other_id)
+      |> unless do
+        player_challenge(player_id, other_id)
+      end
     end
   end 
 
@@ -65,6 +69,26 @@ defmodule Elbuencoffi.PlayerController do
     |> unless do
       player_looth_place(player_id, place_id)
     end
+  end
+
+  defp player_already_challenged(player_id, other_id) do
+    neo4j_ok("""
+    MATCH (a:Player {id: "#{player_id}"})-[:Match]-(b:Player {id: "#{other_id}"})
+    RETURN b as ok
+    """)
+  end
+
+  defp player_challenge(player_id, other_id) do
+    neo4j!("""
+    MATCH (a:Player {id: "#{player_id}"}), (b:Player {id: "#{other_id}"})
+    CREATE (a)-[m:Match]->(b)
+    SET m.id = str(id(m))
+    SET m.latitude_a = a.latitude
+    SET m.longitude_a = a.longitude
+    SET m.latitude_b = b.latitude
+    SET m.longitude_b = b.longitude
+    RETURN m as ok
+    """)
   end
 
   defp player_already_loothed_place(player_id, place_id) do
@@ -84,7 +108,19 @@ defmodule Elbuencoffi.PlayerController do
   end
 
   defp pending_matches(player_id) do
-    []
+    cypher = """
+    MATCH (a:Player {id: "#{player_id}"})-[m:Match]->(b:Player)
+    RETURN m, b    
+    """
+    Neo4j.query!(Neo4j.conn, cypher)
+    |> Enum.map(fn %{"b" => other, "m" => match} -> 
+      %{
+        id: match["id"],
+        nickname: other["nickname"],
+        money: other["money"],
+        avatar_url: other["avatar_url"]
+      }
+    end)
   end
 
 end
