@@ -8,12 +8,12 @@ defmodule Elbuencoffi.MatchController do
   end
 
   defp leaderboard do
-    neo4j! """
+    neo4j!("""
     MATCH (p:Player)
-    RETURN p
+    RETURN p as ok
     ORDER BY p.money
     LIMIT 10
-    """
+    """)
     |> Enum.map(fn p ->
       %{
         nickname: p["nickname"],
