@@ -75,7 +75,7 @@ defmodule Elbuencoffi.PlayerController do
     |> Enum.map(&perform_device_match(&1, player_id))
   end
 
-  defp perform_device_match(%{attributes: %{"id" => other_id, "tags" => ["player"]}}, player_id) do
+  defp perform_device_match(%{"id" => other_id, "tags" => ["player"]}, player_id) do
     unless other_id == player_id do
       player_already_challenged(player_id, other_id)
       |> unless do
@@ -84,7 +84,7 @@ defmodule Elbuencoffi.PlayerController do
     end
   end 
 
-  defp perform_device_match(%{attributes: %{"id" => place_id, "tags" => ["place"]}}, player_id) do
+  defp perform_device_match(%{"id" => place_id, "tags" => ["place"]}, player_id) do
     player_already_loothed_place(player_id, place_id)
     |> unless do
       player_looth_place(player_id, place_id)
