@@ -14,7 +14,7 @@ defmodule Elbuencoffi.MatchController do
     ORDER BY p.money
     LIMIT 10
     """)
-    |> Enum.map(fn p ->
+    |> Enum.map(fn %{"p" => p} ->
       %{
         nickname: p["nickname"],
         avatar_url: p["avatar_url"],
